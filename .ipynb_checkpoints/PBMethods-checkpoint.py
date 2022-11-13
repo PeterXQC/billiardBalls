@@ -107,7 +107,7 @@ def visualize(center_x, center_y, v_x, v_y, r, ax):
         
     ax.set_xlim([min(center_x) - 2, max(center_x) + 2])
     ax.set_ylim([min(center_y) - 2, max(center_y) + 2])
-    ax.set_aspect((max(center_x) - min(center_x) + 4) / (max(center_y) - min(center_y) + 4))
+    ax.set_aspect('equal')
     
 def pinned_random_model(center_x, center_y, v_x, v_y, r):
     edges = setup_edges(center_x, center_y, r)
@@ -117,4 +117,3 @@ def pinned_random_model(center_x, center_y, v_x, v_y, r):
     for i in range(len(step)):
         visualize(center_x, center_y, v_xs[i], v_ys[i], r, ax[i])
         ax[i].title.set_text(step[i])
-        ax[i].set_aspect('equal')
