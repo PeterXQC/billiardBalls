@@ -92,7 +92,7 @@ def random_run(center_x, center_y, v_x, v_y, r, edges, detail = False, debug = F
             v_xs.append(this_x)
             v_ys.append(this_y)
             
-    print("Total Collision:", len(step))
+    print("Total number of collisions when considered as a fixed ball model:", len(step)-1)
     return step, v_xs, v_ys
 
 def visualize(center_x, center_y, v_x, v_y, r, ax):
@@ -109,11 +109,14 @@ def visualize(center_x, center_y, v_x, v_y, r, ax):
     ax.set_ylim([min(center_y) - 2, max(center_y) + 2])
     ax.set_aspect('equal')
     
-def pinned_random_model(center_x, center_y, v_x, v_y, r):
-    edges = setup_edges(center_x, center_y, r)
+def pinned_random_model(edges, center_x, center_y, v_x, v_y, r):
     step, v_xs, v_ys = random_run(center_x, center_y, v_x, v_y, r, edges, True)
 
     fig, ax = plt.subplots(1, len(step), figsize = (len(step)*5, 5))
-    for i in range(len(step)):
-        visualize(center_x, center_y, v_xs[i], v_ys[i], r, ax[i])
-        ax[i].title.set_text(step[i])
+    if len(step) == 1:
+        visualize(center_x, center_y, v_xs[0], v_ys[0], r, ax)
+        ax.title.set_text(step[0])
+    else:
+        for i in range(len(step)):
+            visualize(center_x, center_y, v_xs[i], v_ys[i], r, ax[i])
+            ax[i].title.set_text(step[i])
