@@ -16,8 +16,8 @@ def setup_edges(center_x, center_y, r):
                 # allow an error of 1e-15 to accomodate for numerical error
                 if np.linalg.norm(x_i-x_j) > (2*r - 1e-15) and np.linalg.norm(x_i-x_j) < (2*r + 1e-15):
                     edges[i, j] = 1
-                elif np.linalg.norm(x_i-x_j) < (2*r - 1e-15):
-                    print("Overlapping detected. Double check input.")
+#                 elif np.linalg.norm(x_i-x_j) < (2*r - 1e-15):
+#                     print("Overlapping detected. Double check input.")
     return edges
 
 # check if ball i and ball j are allowed to have collisions. 
@@ -66,7 +66,7 @@ def perform_collision(i, j, edges, center_x, center_y, v_x, v_y):
     return new_x, new_y
     
 # Perform a run that does all collisions until no more balls collide
-def random_run(center_x, center_y, v_x, v_y, r, edges, detail = False, debug = False):
+def random_run(center_x, center_y, v_x, v_y, r, edges):
     collide = all_collision(edges, center_x, center_y, v_x, v_y, r)
 #     [0, 0] denote the initial state
     step = [[0, 0]]
@@ -77,22 +77,25 @@ def random_run(center_x, center_y, v_x, v_y, r, edges, detail = False, debug = F
     v_ys = [this_y]
     
     while len(collide) > 0:
-        if debug:
-            print("Step", step, "collision can happen between", collide)
+#         print(len(collide))
         this_collide = random.randint(0, len(collide)-1)
 
         i = collide[this_collide][0]
         j = collide[this_collide][1]
-        this_x, this_y = perform_collision(i, j, edges, center_x, center_y, this_x, this_y)
+        new_x, new_y = perform_collision(i, j, edges, center_x, center_y, this_x, this_y)
+#         print(np.linalg.norm(new_x - this_x))
+#         print(np.linalg.norm(new_y - this_y))
+        if np.linalg.norm(new_x - this_x) < 1e-15 and np.linalg.norm(new_y - this_y) < 1e-15:
+            break
+        else:
+            this_x = new_x
+            this_y = new_y
 
-        edges = setup_edges(center_x, center_y, r)
         collide = all_collision(edges, center_x, center_y, this_x, this_y, r)
         step.append([i, j])
-        if detail:
-            v_xs.append(this_x)
-            v_ys.append(this_y)
+        v_xs.append(this_x)
+        v_ys.append(this_y)
             
-    print("Total number of collisions when considered as a fixed ball model:", len(step)-1)
     return step, v_xs, v_ys
 
 def visualize(center_x, center_y, v_x, v_y, r, ax):
@@ -109,14 +112,13 @@ def visualize(center_x, center_y, v_x, v_y, r, ax):
     ax.set_ylim([min(center_y) - 2, max(center_y) + 2])
     ax.set_aspect('equal')
     
-def pinned_random_model(edges, center_x, center_y, v_x, v_y, r):
-    step, v_xs, v_ys = random_run(center_x, center_y, v_x, v_y, r, edges, True)
-
-    fig, ax = plt.subplots(1, len(step), figsize = (len(step)*5, 5))
-    if len(step) == 1:
-        visualize(center_x, center_y, v_xs[0], v_ys[0], r, ax)
-        ax.title.set_text(step[0])
-    else:
+def pinned_random_model(edges, center_x, center_y, v_x, v_y, r, location = "", save = False):
+    step, v_xs, v_ys = random_run(center_x, center_y, v_x, v_y, r, edges)
+    if save:
+        fig, ax = plt.subplots(1, 1, figsize = (20, 20))
+        ax.axis('off')
         for i in range(len(step)):
-            visualize(center_x, center_y, v_xs[i], v_ys[i], r, ax[i])
-            ax[i].title.set_text(step[i])
+            visualize(center_x, center_y, v_xs[i], v_ys[i], r, ax)
+            plt.savefig(location + "/" + str(i) + ".png")
+            plt.cla()
+    return len(step) - 1
