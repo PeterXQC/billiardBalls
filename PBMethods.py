@@ -76,8 +76,12 @@ def random_run(center_x, center_y, v_x, v_y, r, edges):
     v_xs = [this_x]
     v_ys = [this_y]
     
+    indic = 0
+    
     while len(collide) > 0:
-#         print(len(collide))
+        indic += 1
+#         print(indic)
+#         print("collide", collide)
         this_collide = random.randint(0, len(collide)-1)
 
         i = collide[this_collide][0]
@@ -85,13 +89,20 @@ def random_run(center_x, center_y, v_x, v_y, r, edges):
         new_x, new_y = perform_collision(i, j, edges, center_x, center_y, this_x, this_y)
 #         print(np.linalg.norm(new_x - this_x))
 #         print(np.linalg.norm(new_y - this_y))
-        if np.linalg.norm(new_x - this_x) < 1e-15 and np.linalg.norm(new_y - this_y) < 1e-15:
-            break
-        else:
-            this_x = new_x
-            this_y = new_y
+        to_remove = []
+        if ((new_x - this_x).all() < 1e-15) and ((new_y - this_y).all() < 1e-15):
+            to_remove.append([i, j])
+#         print(new_x - this_x)
+#         print(new_y - this_y)
+            
+#         print("to_remove", to_remove)
+        this_x = new_x
+        this_y = new_y
 
         collide = all_collision(edges, center_x, center_y, this_x, this_y, r)
+#         print("next collide", collide)
+        for i in np.arange(len(to_remove)):
+            if to_remove[i] in collide: collide.remove(to_remove[i])
         step.append([i, j])
         v_xs.append(this_x)
         v_ys.append(this_y)
